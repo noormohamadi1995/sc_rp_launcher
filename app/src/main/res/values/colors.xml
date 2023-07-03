@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#164B60</color>
+    <color name="colorSecondary">#001C30</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="navigation_after_click">#F86F03</color>
+    <color name="navigation_before_click">#FFA41B</color>
+</resources>

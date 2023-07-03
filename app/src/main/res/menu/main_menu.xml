@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/notificationFragment"
+        android:title="@string/notification"
+        android:icon="@drawable/ic_notification"/>
+    <item android:id="@+id/dashboardFragment"
+        android:title="@string/dashboard"
+        android:icon="@drawable/baseline_home_24"/>
+    <item android:id="@+id/loginFragment"
+        android:title="@string/login"
+        android:icon="@drawable/baseline_login_24"/>
+
+</menu>
