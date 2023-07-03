@@ -13,6 +13,11 @@
         <item name="postSplashScreenTheme">@style/Theme.SCRPLauncher</item>
     </style>
 
+    <style name="DialogStyle" parent="Theme.Material3.DayNight.Dialog">
+        <item name="android:windowMinWidthMajor">90%</item>
+        <item name="android:windowMinWidthMinor">90%</item>
+    </style>
+
 
     <style name="Theme.SCRPLauncher" parent="Base.Theme.SCRPLauncher" />
 </resources>

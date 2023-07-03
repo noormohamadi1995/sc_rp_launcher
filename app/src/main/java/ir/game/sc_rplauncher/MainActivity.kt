@@ -35,14 +35,9 @@ class MainActivity : AppCompatActivity() {
                     navController.navigate(R.id.notificationFragment)
                     mBinding.mToolbar.setTitle(R.string.notification)
                 }
-                R.id.loginFragment ->{
-                    val snackBar = Snackbar.make(
-                        findViewById(android.R.id.content),
-                        getText(R.string.update), Snackbar.LENGTH_LONG
-                    )
-                    snackBar.show()
-                    ViewCompat.setLayoutDirection(snackBar.view,ViewCompat.LAYOUT_DIRECTION_RTL)
-                }
+                R.id.loginFragment -> showSnackBar()
+
+                R.id.aboutFragment -> showSnackBar()
             }
 
             true
@@ -54,5 +49,14 @@ class MainActivity : AppCompatActivity() {
                 .setTopRightCorner(CornerFamily.ROUNDED, 48f)
                 .setTopLeftCorner(CornerFamily.ROUNDED, 48f)
                 .build()
+    }
+
+    private fun showSnackBar(){
+        val snackBar = Snackbar.make(
+            findViewById(android.R.id.content),
+            getText(R.string.update), Snackbar.LENGTH_LONG
+        )
+        snackBar.show()
+        ViewCompat.setLayoutDirection(snackBar.view,ViewCompat.LAYOUT_DIRECTION_RTL)
     }
 }

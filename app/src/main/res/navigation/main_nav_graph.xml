@@ -14,5 +14,23 @@
         android:id="@+id/notificationFragment"
         android:name="ir.game.sc_rplauncher.fragment.NotificationFragment"
         android:label="@string/notification"
-        tools:layout="@layout/fragment_notification" />
+        tools:layout="@layout/fragment_notification" >
+        <action
+            android:id="@+id/action_notificationFragment_to_customAlertDialog"
+            app:destination="@id/customAlertDialog" />
+    </fragment>
+    <dialog
+        android:id="@+id/customAlertDialog"
+        android:name="ir.game.sc_rplauncher.dialog.CustomAlertDialog"
+        android:label="CustomAlertDialog" >
+        <argument
+            android:name="title"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+        <argument
+            android:name="content"
+            app:argType="string"
+            app:nullable="true" />
+    </dialog>
 </navigation>
