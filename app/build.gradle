@@ -94,4 +94,11 @@ dependencies {
 
     //splashScreen
     implementation 'androidx.core:core-splashscreen:1.0.1'
+
+    //orbit mvi
+    implementation("org.orbit-mvi:orbit-core:6.0.0")
+    implementation("org.orbit-mvi:orbit-viewmodel:6.0.0")
+
+    //permissionx
+    implementation("com.guolindev.permissionx:permissionx:1.7.1")
 }

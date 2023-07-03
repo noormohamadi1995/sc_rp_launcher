@@ -136,4 +136,6 @@
     <string name="data_download">دانلود دیتا</string>
     <string name="insert_account_name">اسم اکانت خود را وارد کنید</string>
     <string name="start_game">شروع بازی</string>
+    <string name="permission_deny">برای کار با برنامه حتما باید همه دسترسی ها داده شود</string>
+    <string name="found_data">دیتا یافت شد</string>
 </resources>

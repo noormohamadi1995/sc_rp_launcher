@@ -1,13 +1,16 @@
 package ir.game.sc_rplauncher
 
+import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.annotation.StringRes
 import androidx.core.view.ViewCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.shape.CornerFamily
 import com.google.android.material.shape.MaterialShapeDrawable
 import com.google.android.material.snackbar.Snackbar
+import com.permissionx.guolindev.PermissionX
 import dagger.hilt.android.AndroidEntryPoint
 import ir.game.sc_rplauncher.databinding.ActivityMainBinding
 
@@ -18,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        checkPermissions()
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
@@ -33,7 +37,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.notificationFragment -> {
                     navController.navigate(R.id.notificationFragment)
                 }
-                R.id.loginFragment -> showSnackBar()
+                R.id.loginFragment -> showSnackBar(R.string.update)
 
                 R.id.aboutFragment -> navController.navigate(R.id.aboutFragment)
             }
@@ -58,10 +62,21 @@ class MainActivity : AppCompatActivity() {
                 .build()
     }
 
-    private fun showSnackBar(){
+    private fun checkPermissions(){
+        PermissionX
+            .init(this)
+            .permissions(Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+            .request{allGranted, _, _ ->
+                if(allGranted.not()){
+                    showSnackBar(R.string.permission_deny)
+                }
+            }
+    }
+
+    private fun showSnackBar(@StringRes message : Int){
         val snackBar = Snackbar.make(
             findViewById(android.R.id.content),
-            getText(R.string.update), Snackbar.LENGTH_LONG
+            getText(message), Snackbar.LENGTH_LONG
         )
         snackBar.show()
         ViewCompat.setLayoutDirection(snackBar.view,ViewCompat.LAYOUT_DIRECTION_RTL)

@@ -9,13 +9,17 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
 import ir.game.sc_rplauncher.R
 import ir.game.sc_rplauncher.databinding.FragmentDashboardBinding
+import ir.game.sc_rplauncher.viewModel.FileViewModel
+import org.orbitmvi.orbit.viewmodel.observe
 
 @AndroidEntryPoint
 class DashboardFragment : Fragment() {
     private var mBinding: FragmentDashboardBinding? = null
+    private val mViewModel by viewModels<FileViewModel>()
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -25,9 +29,16 @@ class DashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        mViewModel.checkFolder()
         mBinding?.apply {
             setUpView()
+            mViewModel.observe(
+                viewLifecycleOwner,
+                state = {
+                    btnDownloadData.isEnabled = it.isExitFolder.not()
+                    btnDownloadData.text = getString(if (it.isExitFolder) R.string.found_data else R.string.data_download)
+                }
+            )
         }
     }
 
