@@ -21,7 +21,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginHorizontal="16dp"
                 app:backgroundTint="@null"
-                android:text="معرفی رول پلی"
+                android:text="@string/about_rule_play"
                 android:background="@drawable/btn_gradient_shape"
                 android:layout_height="wrap_content"/>
 
@@ -31,7 +31,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginHorizontal="16dp"
                 app:backgroundTint="@null"
-                android:text="دانلود دیتا"
+                android:text="@string/data_download"
                 android:background="@drawable/btn_gradient_shape"
                 android:layout_height="wrap_content"/>
 
@@ -50,7 +50,7 @@
                     android:textColorHint="@color/white"
                     android:layout_width="match_parent"
                     android:gravity="center"
-                    android:hint="اسم اکانت خود را وارد کنید"
+                    android:hint="@string/insert_account_name"
                     android:layout_height="match_parent"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -60,7 +60,7 @@
                 android:layout_marginTop="16dp"
                 android:layout_marginHorizontal="16dp"
                 app:backgroundTint="@null"
-                android:text="شروع بازی"
+                android:text="@string/start_game"
                 android:background="@drawable/btn_gradient_shape"
                 android:layout_height="wrap_content"/>
 

@@ -126,4 +126,14 @@
     <string name="login">ورود</string>
     <string name="about">درباره ما</string>
     <string name="close">بستن</string>
+    <string name="telegram"><a href="https://t.me/suncityroleplay">https://t.me/suncityroleplay</a></string>
+    <string name="webSite"><a href="https://suncity-rp.top/">https://suncity-rp.top/</a></string>
+    <string name="tel_channel">کانال تلگرامی ما:</string>
+    <string name="web_site">وب سایت:</string>
+    <string name="version">نسخه:</string>
+    <string name="about_content">بازی جی تی ای سن اندرس را آنلاین روی کامپیوتر و یا موبایل هوشمند خود بازی کنید</string>
+    <string name="about_rule_play">معرفی رول پلی</string>
+    <string name="data_download">دانلود دیتا</string>
+    <string name="insert_account_name">اسم اکانت خود را وارد کنید</string>
+    <string name="start_game">شروع بازی</string>
 </resources>

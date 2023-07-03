@@ -29,18 +29,25 @@ class MainActivity : AppCompatActivity() {
             when(it.itemId){
                 R.id.dashboardFragment -> {
                     navController.navigate(R.id.dashboardFragment)
-                    mBinding.mToolbar.setTitle(R.string.dashboard)
                 }
                 R.id.notificationFragment -> {
                     navController.navigate(R.id.notificationFragment)
-                    mBinding.mToolbar.setTitle(R.string.notification)
                 }
                 R.id.loginFragment -> showSnackBar()
 
-                R.id.aboutFragment -> showSnackBar()
+                R.id.aboutFragment -> navController.navigate(R.id.aboutFragment)
             }
 
             true
+        }
+
+        navController.addOnDestinationChangedListener{controller, destination, arguments ->
+            when(destination.id){
+                R.id.loginFragment -> {}
+                R.id.dashboardFragment -> mBinding.mToolbar.setTitle(R.string.dashboard)
+                R.id.notificationFragment -> mBinding.mToolbar.setTitle(R.string.notification)
+                R.id.aboutFragment -> mBinding.mToolbar.setTitle(R.string.about)
+            }
         }
 
         val bottomNavigationViewBackground = mBinding.bottomNavigation.background as MaterialShapeDrawable
