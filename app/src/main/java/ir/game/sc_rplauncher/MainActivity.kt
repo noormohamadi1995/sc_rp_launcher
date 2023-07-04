@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
     private fun checkPermissions(){
         PermissionX
             .init(this)
-            .permissions(Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.MANAGE_EXTERNAL_STORAGE)
+            .permissions(Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE)
             .request{allGranted, _, _ ->
                 if(allGranted.not()){
                     showSnackBar(R.string.permission_deny)

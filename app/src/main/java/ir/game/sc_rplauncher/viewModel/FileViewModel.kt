@@ -1,8 +1,10 @@
 package ir.game.sc_rplauncher.viewModel
 
+import android.content.Context
 import android.os.Environment
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import ir.game.sc_rplauncher.util.Utility.checkInstalledPackage
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
 import org.orbitmvi.orbit.syntax.simple.intent
@@ -17,13 +19,17 @@ class FileViewModel @Inject constructor() : ViewModel(),ContainerHost<FileViewSt
         initialState = FileViewState()
     )
 
-    fun checkFolder() = intent {
-        val path = Environment.getExternalStorageDirectory().path + File.separator + "suncityrp"
-        val file = File(path)
+    fun checkFolder(context: Context) = intent {
+        val file = File(Environment.getExternalStorageDirectory(),"suncityrp")
         reduce {
             state.copy(
-                isExitFolder = file.exists()
+                isExitFolder = file.exists(),
+                isInstalledGame = context.checkInstalledPackage("ir.suncityrp.client")
             )
         }
+    }
+
+    fun downloadFile() = intent {
+
     }
 }

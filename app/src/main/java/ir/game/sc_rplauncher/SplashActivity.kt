@@ -20,7 +20,7 @@ class SplashActivity : AppCompatActivity() {
         }
 
         GlobalScope.launch {
-            delay(2000)
+            delay(1000)
             Intent(this@SplashActivity,MainActivity::class.java).apply {
                 startActivity(this)
                 finishAffinity()

@@ -14,6 +14,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import ir.game.sc_rplauncher.R
 import ir.game.sc_rplauncher.databinding.FragmentDashboardBinding
 import ir.game.sc_rplauncher.viewModel.FileViewModel
+import ir.game.sc_rplauncher.viewModel.FileViewState
 import org.orbitmvi.orbit.viewmodel.observe
 
 @AndroidEntryPoint
@@ -29,14 +30,13 @@ class DashboardFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mViewModel.checkFolder()
+        mViewModel.checkFolder(requireContext())
         mBinding?.apply {
             setUpView()
             mViewModel.observe(
                 viewLifecycleOwner,
                 state = {
-                    btnDownloadData.isEnabled = it.isExitFolder.not()
-                    btnDownloadData.text = getString(if (it.isExitFolder) R.string.found_data else R.string.data_download)
+                    render(it)
                 }
             )
         }
@@ -65,11 +65,20 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    private fun showRuleDialog(){
+    context(FragmentDashboardBinding)
+            private fun render(fileViewState: FileViewState) {
+        btnDownloadData.isEnabled = fileViewState.isExitFolder.not()
+        btnDownloadData.text =
+            getString(if (fileViewState.isExitFolder) R.string.found_data else R.string.data_download)
+        btnStartGame.isEnabled = fileViewState.isInstalledGame
+    }
+
+    private fun showRuleDialog() {
         val dialog = AlertDialog.Builder(requireContext())
             .setMessage(R.string.rule_play)
-            .setPositiveButton("بستن"
-            ) { p0, p1 -> p0.dismiss()}
+            .setPositiveButton(
+                "بستن"
+            ) { p0, p1 -> p0.dismiss() }
             .create()
         dialog.show()
         val textView = dialog.findViewById<View>(android.R.id.message) as TextView
