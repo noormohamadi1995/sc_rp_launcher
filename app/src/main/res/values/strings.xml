@@ -138,4 +138,6 @@
     <string name="start_game">شروع بازی</string>
     <string name="permission_deny">برای کار با برنامه حتما باید همه دسترسی ها داده شود</string>
     <string name="found_data">دیتا یافت شد</string>
+    <string name="download_error">خطا در دانلود فایل</string>
+    <string name="cancel">انصراف</string>
 </resources>
