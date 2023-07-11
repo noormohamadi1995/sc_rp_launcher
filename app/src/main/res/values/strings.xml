@@ -140,4 +140,6 @@
     <string name="found_data">دیتا یافت شد</string>
     <string name="download_error">خطا در دانلود فایل</string>
     <string name="cancel">انصراف</string>
+    <string name="loading">لطفا صبر کنید...</string>
+
 </resources>

@@ -2,7 +2,10 @@ package ir.game.sc_rplauncher.util
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import androidx.core.content.FileProvider
+import java.io.File
 
 
 object Utility {
@@ -17,5 +20,13 @@ object Utility {
         }catch (e: PackageManager.NameNotFoundException){
             false
         }
+    }
+
+    fun String.getUriFromFile(context: Context): Uri {
+       return FileProvider.getUriForFile(
+            context,
+            "${context.applicationContext.packageName}.provider",
+            File(this)
+        )
     }
 }
