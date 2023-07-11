@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.tonyodev.fetch2.Download
 import com.tonyodev.fetch2.Error
 import com.tonyodev.fetch2.Fetch
-import com.tonyodev.fetch2.FetchConfiguration
 import com.tonyodev.fetch2.FetchListener
 import com.tonyodev.fetch2.NetworkType
 import com.tonyodev.fetch2.Priority
@@ -17,7 +16,6 @@ import com.tonyodev.fetch2core.DownloadBlock
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ir.game.sc_rplauncher.R
 import ir.game.sc_rplauncher.util.Constant
-import ir.game.sc_rplauncher.util.Decompress
 import ir.game.sc_rplauncher.util.FileUtil
 import ir.game.sc_rplauncher.util.Utility.checkInstalledPackage
 import kotlinx.coroutines.Dispatchers
@@ -34,7 +32,9 @@ import javax.inject.Inject
 
 
 @HiltViewModel
-class FileViewModel @Inject constructor() : ViewModel(),
+class FileViewModel @Inject constructor(
+    private val fetch: Fetch
+) : ViewModel(),
     ContainerHost<FileViewState, FileSideEffect> {
     override val container: Container<FileViewState, FileSideEffect> = container(
         initialState = FileViewState()
@@ -51,15 +51,10 @@ class FileViewModel @Inject constructor() : ViewModel(),
         }
     }
 
-    fun downloadFile(context: Context, fileUrl: String) = intent {
-        val fetchConfiguration = FetchConfiguration.Builder(context)
-            .setDownloadConcurrentLimit(3)
-            .build()
-        val fetch = Fetch.Impl.getInstance(fetchConfiguration)
+    fun downloadFile(fileUrl: String) = intent {
+        fetch.removeAll()
         val fileName = URLUtil.guessFileName(fileUrl, null, null)
-
         val file = Environment.getExternalStorageDirectory().path + File.separator + fileName
-
         val request = Request(fileUrl, file)
         request.priority = Priority.HIGH
         request.networkType = NetworkType.ALL
@@ -68,6 +63,7 @@ class FileViewModel @Inject constructor() : ViewModel(),
                 Timber.tag("wwww").e(updatedRequest.toString())
             }
         ) { error: Error? ->
+            Timber.tag("start download error").e(error?.throwable)
             viewModelScope.launch {
                 postSideEffect(sideEffect = FileSideEffect.DownloadError(R.string.download_error))
             }
@@ -83,12 +79,13 @@ class FileViewModel @Inject constructor() : ViewModel(),
                 }
 
                 override fun onCompleted(download: Download) {
+                    Timber.tag("download").e(download.file)
                     viewModelScope.launch(Dispatchers.IO) {
                         postSideEffect(sideEffect = FileSideEffect.CompleteDownload)
                         postSideEffect(sideEffect = FileSideEffect.UnZipFile(false))
-                        val unzip =
+/*                        val unzip =
                             Decompress(context.contentResolver.openInputStream(download.fileUri))
-                        postSideEffect(sideEffect = FileSideEffect.UnZipFile(unzip.unzip()))
+                        postSideEffect(sideEffect = FileSideEffect.UnZipFile(unzip.unzip()))*/
                         reduce {
                             state.copy(
                                 isExitFolder = FileUtil.getDirExist(Constant.DATA_FOLDER_NAME)
@@ -108,6 +105,7 @@ class FileViewModel @Inject constructor() : ViewModel(),
                 }
 
                 override fun onError(download: Download, error: Error, throwable: Throwable?) {
+                    Timber.tag("error download").e(throwable)
                     FileUtil.removeDir(download.file)
                     viewModelScope.launch {
                         postSideEffect(sideEffect = FileSideEffect.DownloadError(R.string.download_error))
@@ -123,6 +121,7 @@ class FileViewModel @Inject constructor() : ViewModel(),
                     etaInMilliSeconds: Long,
                     downloadedBytesPerSecond: Long
                 ) {
+                    Timber.tag("download progress").e(download.progress.toString())
                     viewModelScope.launch {
                         postSideEffect(
                             sideEffect = FileSideEffect.DownloadFile(
@@ -133,6 +132,7 @@ class FileViewModel @Inject constructor() : ViewModel(),
                 }
 
                 override fun onQueued(download: Download, waitingOnNetwork: Boolean) {
+                    Timber.tag("download start").e("start download")
                     viewModelScope.launch {
                         postSideEffect(sideEffect = FileSideEffect.StartDownload)
                     }
@@ -161,11 +161,8 @@ class FileViewModel @Inject constructor() : ViewModel(),
 
     }
 
-    fun downloadApk(context: Context, fileUrl: String) = intent {
-        val fetchConfiguration = FetchConfiguration.Builder(context)
-            .setDownloadConcurrentLimit(3)
-            .build()
-        val fetch = Fetch.Impl.getInstance(fetchConfiguration)
+    fun downloadApk(fileUrl: String) = intent {
+        fetch.removeAll()
         val fileName = URLUtil.guessFileName(fileUrl, null, null)
 
         val file =

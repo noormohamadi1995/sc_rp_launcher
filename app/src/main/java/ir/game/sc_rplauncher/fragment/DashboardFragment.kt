@@ -31,7 +31,7 @@ import org.orbitmvi.orbit.viewmodel.observe
 class DashboardFragment : Fragment() {
     private var mBinding: FragmentDashboardBinding? = null
     private val mViewModel by viewModels<FileViewModel>()
-    private var mProgress: ProgressDialog = ProgressDialog()
+    private var mProgress: ProgressDialog? = null
     private var loadingDialog: androidx.appcompat.app.AlertDialog? = null
 
 
@@ -61,6 +61,9 @@ class DashboardFragment : Fragment() {
             @SuppressLint("SuspiciousIndentation")
             private fun setUpView() {
         val state = mViewModel.container.stateFlow.value
+        mProgress = ProgressDialog()
+        mProgress?.isCancelable = false
+
         btnRulePlay.setOnClickListener {
             showRuleDialog()
         }
@@ -68,7 +71,7 @@ class DashboardFragment : Fragment() {
             if(state.isExitFolder){
 
             }else
-                mViewModel.downloadFile(requireContext(), Constant.ZIP_FILE_LINK_DOWNLOAD)
+                mViewModel.downloadFile(Constant.ZIP_FILE_LINK_DOWNLOAD)
         }
 
         btnStartGame.setOnClickListener {
@@ -79,7 +82,7 @@ class DashboardFragment : Fragment() {
                     startActivity(launchIntent)
                 }
             } else {
-                mViewModel.downloadApk(requireContext(), Constant.APK_FILE_LINK_DOWNLOAD)
+                mViewModel.downloadApk(Constant.APK_FILE_LINK_DOWNLOAD)
             }
         }
 
@@ -103,7 +106,7 @@ class DashboardFragment : Fragment() {
     context(FragmentDashboardBinding)
             private fun handleSideEffect(sideEffect: FileSideEffect) {
         when (sideEffect) {
-            FileSideEffect.CompleteDownload -> mProgress.dismiss()
+            FileSideEffect.CompleteDownload -> hideProgressDialog()
             is FileSideEffect.DownloadError -> {
                 hideLoading()
                 showSnackBar(sideEffect.message)
@@ -111,7 +114,7 @@ class DashboardFragment : Fragment() {
 
             is FileSideEffect.DownloadFile -> {
                 hideLoading()
-                mProgress.setProgress(sideEffect.progress)
+                mProgress?.setProgress(sideEffect.progress)
             }
 
             is FileSideEffect.DownloadCompleteApk -> {
@@ -137,10 +140,20 @@ class DashboardFragment : Fragment() {
             }
 
             is FileSideEffect.UnZipFile -> Unit
-            FileSideEffect.StartDownload -> {
-                mProgress.isCancelable = false
-                mProgress.show(childFragmentManager, "progress_Dialog")
-            }
+            FileSideEffect.StartDownload -> showProgressDownloadFile()
+        }
+    }
+
+    private fun showProgressDownloadFile(){
+        requireActivity().runOnUiThread{
+            if (mProgress?.isAdded?.not() == true)
+                mProgress?.show(this@DashboardFragment.childFragmentManager,"progress_dialog")
+        }
+    }
+
+    private fun hideProgressDialog(){
+        requireActivity().runOnUiThread{
+            mProgress?.dismiss()
         }
     }
 

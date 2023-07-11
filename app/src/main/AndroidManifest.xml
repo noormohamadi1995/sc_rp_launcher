@@ -12,8 +12,9 @@
         android:supportsRtl="true"
         android:preserveLegacyExternalStorage="true"
         android:requestLegacyExternalStorage="true"
+        android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.SCRPLauncher"
-        tools:targetApi="r">
+        tools:targetApi="TIRAMISU">
         <activity
             android:launchMode="singleTask"
             android:theme="@style/Theme.App.Starting"
