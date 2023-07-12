@@ -3,6 +3,7 @@ package ir.game.sc_rplauncher.fragment
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,17 +14,21 @@ import androidx.core.view.ViewCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import ir.game.sc_rplauncher.R
 import ir.game.sc_rplauncher.databinding.FragmentDashboardBinding
 import ir.game.sc_rplauncher.dialog.ProgressDialog
 import ir.game.sc_rplauncher.util.Constant
+import ir.game.sc_rplauncher.util.Decompress
 import ir.game.sc_rplauncher.util.DialogHelper
 import ir.game.sc_rplauncher.util.Utility.getUriFromFile
 import ir.game.sc_rplauncher.viewModel.FileSideEffect
 import ir.game.sc_rplauncher.viewModel.FileViewModel
 import ir.game.sc_rplauncher.viewModel.FileViewState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.viewmodel.observe
 
 
@@ -61,8 +66,6 @@ class DashboardFragment : Fragment() {
             @SuppressLint("SuspiciousIndentation")
             private fun setUpView() {
         val state = mViewModel.container.stateFlow.value
-        mProgress = ProgressDialog()
-        mProgress?.isCancelable = false
 
         btnRulePlay.setOnClickListener {
             showRuleDialog()
@@ -106,7 +109,22 @@ class DashboardFragment : Fragment() {
     context(FragmentDashboardBinding)
             private fun handleSideEffect(sideEffect: FileSideEffect) {
         when (sideEffect) {
-            FileSideEffect.CompleteDownload -> hideProgressDialog()
+            is FileSideEffect.CompleteDownload -> {
+                hideProgressDialog()
+                sideEffect.zipFile?.also {uri->
+                    showLoading()
+                    lifecycleScope.launch(Dispatchers.IO){
+                        val unzip = Decompress(requireContext().contentResolver.openInputStream(uri))
+                        if (unzip.unzip()){
+                            mViewModel.checkFolder(requireContext())
+                            hideLoading()
+                        }else {
+                            showSnackBar(R.string.zun_zip_error)
+                            hideLoading()
+                        }
+                    }
+                }
+            }
             is FileSideEffect.DownloadError -> {
                 hideLoading()
                 showSnackBar(sideEffect.message)
@@ -118,23 +136,33 @@ class DashboardFragment : Fragment() {
             }
 
             is FileSideEffect.DownloadCompleteApk -> {
+                hideLoading()
                 try {
-                    hideLoading()
                     val uri = sideEffect.file.getUriFromFile(requireContext())
                     try {
-                        requireContext().contentResolver.getType(uri)
+                        val mime = requireContext().contentResolver.getType(uri)
                         val showIntent = Intent(Intent.ACTION_VIEW)
                         showIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         showIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        showIntent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
-                        showIntent.action = Intent.ACTION_INSTALL_PACKAGE
-                        showIntent.data = uri
+                        if (mime == "application/vnd.android.package-archive") {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                showIntent.putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+                                showIntent.action = Intent.ACTION_INSTALL_PACKAGE
+                                showIntent.data = uri
+                            } else {
+                                showIntent.action = Intent.ACTION_VIEW
+                                showIntent.setDataAndType(uri, mime)
+                            }
+                        } else {
+                            showIntent.setDataAndType(uri, mime)
+                            showIntent.action = Intent.ACTION_VIEW
+                        }
                         this.startActivity(showIntent)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
 
-                } catch (e: Exception) {
+                } catch (e: java.lang.Exception) {
                     e.printStackTrace()
                 }
             }
@@ -146,8 +174,9 @@ class DashboardFragment : Fragment() {
 
     private fun showProgressDownloadFile(){
         requireActivity().runOnUiThread{
-            if (mProgress?.isAdded?.not() == true)
-                mProgress?.show(this@DashboardFragment.childFragmentManager,"progress_dialog")
+            mProgress = ProgressDialog()
+            mProgress?.isCancelable = false
+            mProgress?.show(this@DashboardFragment.childFragmentManager, "progress_dialog")
         }
     }
 

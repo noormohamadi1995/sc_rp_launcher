@@ -140,6 +140,8 @@
     <string name="found_data">دیتا یافت شد</string>
     <string name="download_error">خطا در دانلود فایل</string>
     <string name="cancel">انصراف</string>
-    <string name="loading">لطفا صبر کنید...</string>
+    <string name="loading">در حال استخراج فایل ها...</string>
+    <string name="zun_zip_error">خطا در انجام عملیات</string>
+    <string name="permission_not_granted">برای نصب بازی باید مجوز داده شود.</string>
 
 </resources>

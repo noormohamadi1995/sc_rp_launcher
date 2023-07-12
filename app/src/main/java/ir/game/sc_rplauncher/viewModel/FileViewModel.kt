@@ -18,7 +18,6 @@ import ir.game.sc_rplauncher.R
 import ir.game.sc_rplauncher.util.Constant
 import ir.game.sc_rplauncher.util.FileUtil
 import ir.game.sc_rplauncher.util.Utility.checkInstalledPackage
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.Container
 import org.orbitmvi.orbit.ContainerHost
@@ -51,6 +50,7 @@ class FileViewModel @Inject constructor(
         }
     }
 
+
     fun downloadFile(fileUrl: String) = intent {
         fetch.removeAll()
         val fileName = URLUtil.guessFileName(fileUrl, null, null)
@@ -80,17 +80,8 @@ class FileViewModel @Inject constructor(
 
                 override fun onCompleted(download: Download) {
                     Timber.tag("download").e(download.file)
-                    viewModelScope.launch(Dispatchers.IO) {
-                        postSideEffect(sideEffect = FileSideEffect.CompleteDownload)
-                        postSideEffect(sideEffect = FileSideEffect.UnZipFile(false))
-/*                        val unzip =
-                            Decompress(context.contentResolver.openInputStream(download.fileUri))
-                        postSideEffect(sideEffect = FileSideEffect.UnZipFile(unzip.unzip()))*/
-                        reduce {
-                            state.copy(
-                                isExitFolder = FileUtil.getDirExist(Constant.DATA_FOLDER_NAME)
-                            )
-                        }
+                    viewModelScope.launch {
+                        postSideEffect(sideEffect = FileSideEffect.CompleteDownload(download.fileUri))
                     }
                 }
 
@@ -190,8 +181,8 @@ class FileViewModel @Inject constructor(
 
                 override fun onCompleted(download: Download) {
                     viewModelScope.launch {
-                        postSideEffect(sideEffect = FileSideEffect.CompleteDownload)
-                        postSideEffect(sideEffect = FileSideEffect.DownloadCompleteApk(file))
+                        postSideEffect(sideEffect = FileSideEffect.CompleteDownload())
+                        postSideEffect(sideEffect = FileSideEffect.DownloadCompleteApk(download.file))
                     }
                 }
 
