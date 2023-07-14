@@ -143,5 +143,7 @@
     <string name="loading">در حال استخراج فایل ها...</string>
     <string name="zun_zip_error">خطا در انجام عملیات</string>
     <string name="permission_not_granted">برای نصب بازی باید مجوز داده شود.</string>
+    <string name="username_empty">نام کاربری نمیتواند خالی باشد</string>
+    <string name="username_replace_success">عملیات با موفقیت انجام شد</string>
 
 </resources>

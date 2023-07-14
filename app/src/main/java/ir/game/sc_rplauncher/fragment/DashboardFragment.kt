@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.core.net.toFile
 import androidx.core.view.ViewCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -72,20 +73,19 @@ class DashboardFragment : Fragment() {
         }
         btnDownloadData.setOnClickListener {
             if(state.isExitFolder){
-
+                val username = edtAddress.text.toString()
+                if (username.isNotEmpty()){
+                    mViewModel.setUsernameToFile(username)
+                }else showSnackBar(R.string.username_empty)
             }else
                 mViewModel.downloadFile(Constant.ZIP_FILE_LINK_DOWNLOAD)
         }
 
         btnStartGame.setOnClickListener {
-            if (state.isInstalledGame) {
-                val launchIntent =
-                    requireContext().packageManager.getLaunchIntentForPackage("ir.suncityrp.client")
-                if (launchIntent != null) {
-                    startActivity(launchIntent)
-                }
-            } else {
-                mViewModel.downloadApk(Constant.APK_FILE_LINK_DOWNLOAD)
+            val launchIntent =
+                requireContext().packageManager.getLaunchIntentForPackage(Constant.GAME_PACKAGE)
+            if (launchIntent != null) {
+                startActivity(launchIntent)
             }
         }
 
@@ -103,7 +103,7 @@ class DashboardFragment : Fragment() {
         btnDownloadData.text = getString(
             if (fileViewState.isExitFolder) R.string.found_data
             else R.string.data_download)
-        btnStartGame.text = if (fileViewState.isInstalledGame) "شروع بازی" else "دانلود بازی"
+        btnStartGame.isEnabled = fileViewState.isExitFolder
     }
 
     context(FragmentDashboardBinding)
@@ -116,12 +116,14 @@ class DashboardFragment : Fragment() {
                     lifecycleScope.launch(Dispatchers.IO){
                         val unzip = Decompress(requireContext().contentResolver.openInputStream(uri))
                         if (unzip.unzip()){
-                            mViewModel.checkFolder(requireContext())
+                            val file = uri.toFile()
+                            file.delete()
                             hideLoading()
                         }else {
                             showSnackBar(R.string.zun_zip_error)
                             hideLoading()
                         }
+                        mViewModel.downloadApk(Constant.APK_FILE_LINK_DOWNLOAD)
                     }
                 }
             }
@@ -136,6 +138,7 @@ class DashboardFragment : Fragment() {
             }
 
             is FileSideEffect.DownloadCompleteApk -> {
+                mViewModel.checkFolder(requireContext())
                 hideLoading()
                 try {
                     val uri = sideEffect.file.getUriFromFile(requireContext())
@@ -169,6 +172,7 @@ class DashboardFragment : Fragment() {
 
             is FileSideEffect.UnZipFile -> Unit
             FileSideEffect.StartDownload -> showProgressDownloadFile()
+            is FileSideEffect.SuccessfullySetUsername ->showSnackBar(sideEffect.message)
         }
     }
 

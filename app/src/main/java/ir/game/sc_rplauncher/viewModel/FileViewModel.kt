@@ -44,12 +44,23 @@ class FileViewModel @Inject constructor(
             state.copy(
                 isExitFolder = FileUtil.getDirExist(Constant.DATA_FOLDER_NAME) && context.checkInstalledPackage(
                     Constant.GAME_PACKAGE
-                ),
-                isInstalledGame = context.checkInstalledPackage(Constant.GAME_PACKAGE)
+                )
             )
         }
     }
 
+    fun setUsernameToFile(username: String) = intent {
+        val filePath =
+            Environment.getExternalStorageDirectory().path + File.separator + Constant.DATA_FOLDER_NAME + File.separator + "YourName" + File.separator + "name.ini"
+        val file = File(filePath)
+        val content = file.readText()
+        val index = content.indexOf("name = ")
+        val strBuilder = StringBuilder(content)
+        val subStr = strBuilder.substring(index + "name = ".length, content.length)
+        val modifiedContent = content.replace(subStr, username)
+        file.writeText(modifiedContent)
+        postSideEffect(sideEffect = FileSideEffect.SuccessfullySetUsername(R.string.username_replace_success))
+    }
 
     fun downloadFile(fileUrl: String) = intent {
         fetch.removeAll()
