@@ -39,8 +39,6 @@ class DashboardFragment : Fragment() {
     private val mViewModel by viewModels<FileViewModel>()
     private var mProgress: ProgressDialog? = null
     private var loadingDialog: androidx.appcompat.app.AlertDialog? = null
-
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -52,7 +50,6 @@ class DashboardFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         mViewModel.checkFolder(requireContext())
         mBinding?.apply {
-            setUpView()
             mViewModel.observe(
                 viewLifecycleOwner,
                 state = {
@@ -60,25 +57,15 @@ class DashboardFragment : Fragment() {
                 },
                 sideEffect = { handleSideEffect(it) }
             )
+            setUpView()
         }
     }
 
     context(FragmentDashboardBinding)
             @SuppressLint("SuspiciousIndentation")
             private fun setUpView() {
-        val state = mViewModel.container.stateFlow.value
-
         btnRulePlay.setOnClickListener {
             showRuleDialog()
-        }
-        btnDownloadData.setOnClickListener {
-            if(state.isExitFolder){
-                val username = edtAddress.text.toString()
-                if (username.isNotEmpty()){
-                    mViewModel.setUsernameToFile(username)
-                }else showSnackBar(R.string.username_empty)
-            }else
-                mViewModel.downloadFile(Constant.ZIP_FILE_LINK_DOWNLOAD)
         }
 
         btnStartGame.setOnClickListener {
@@ -104,6 +91,15 @@ class DashboardFragment : Fragment() {
             if (fileViewState.isExitFolder) R.string.found_data
             else R.string.data_download)
         btnStartGame.isEnabled = fileViewState.isExitFolder
+        btnDownloadData.setOnClickListener {
+            if(fileViewState.isExitFolder){
+                val username = edtAddress.text.toString()
+                if (username.isNotEmpty()){
+                    mViewModel.setUsernameToFile(username)
+                }else showSnackBar(R.string.username_empty)
+            }else
+                mViewModel.downloadFile(Constant.ZIP_FILE_LINK_DOWNLOAD)
+        }
     }
 
     context(FragmentDashboardBinding)
