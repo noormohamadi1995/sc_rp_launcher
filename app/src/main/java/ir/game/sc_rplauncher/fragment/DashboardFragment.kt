@@ -134,6 +134,7 @@ class DashboardFragment : Fragment() {
             }
 
             is FileSideEffect.DownloadCompleteApk -> {
+                hideProgressDialog()
                 mViewModel.checkFolder(requireContext())
                 hideLoading()
                 try {

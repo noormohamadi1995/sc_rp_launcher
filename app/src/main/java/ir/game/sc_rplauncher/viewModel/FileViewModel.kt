@@ -192,7 +192,6 @@ class FileViewModel @Inject constructor(
 
                 override fun onCompleted(download: Download) {
                     viewModelScope.launch {
-                        postSideEffect(sideEffect = FileSideEffect.CompleteDownload())
                         postSideEffect(sideEffect = FileSideEffect.DownloadCompleteApk(download.file))
                     }
                 }
