@@ -90,17 +90,17 @@ class DashboardFragment : Fragment() {
             private fun render(fileViewState: FileViewState) {
         btnDownloadData.text = getString(
             if (fileViewState.isExitFolder) R.string.found_data
-            else R.string.data_download)
+            else R.string.data_download
+        )
         btnStartGame.isEnabled = fileViewState.isExitFolder
         btnDownloadData.setOnClickListener {
-            if(fileViewState.isExitFolder){
+            if (fileViewState.isExitFolder) {
                 val username = edtAddress.text.toString()
-                if (username.isNotEmpty()){
+                if (username.isNotEmpty()) {
                     mViewModel.setUsernameToFile(username)
-                }else showSnackBar(R.string.username_empty)
-            }else{
-                Timber.tag("ggggg").e("hhhhhhhh")
-                mViewModel.downloadFile(Constant.ZIP_FILE_LINK_DOWNLOAD,true)
+                } else showSnackBar(R.string.username_empty)
+            } else {
+                mViewModel.downloadFile(Constant.ZIP_FILE_LINK_DOWNLOAD, true)
             }
         }
     }
@@ -110,23 +110,24 @@ class DashboardFragment : Fragment() {
         when (sideEffect) {
             is FileSideEffect.CompleteDownloadFile -> {
                 hideProgressDialog()
-                mViewModel.downloadFile(Constant.APK_FILE_LINK_DOWNLOAD,false)
-
-                /*                sideEffect.zipFile?.also {uri->
-                                    showLoading()
-                                    lifecycleScope.launch(Dispatchers.IO){
-                                        val unzip = Decompress(requireContext().contentResolver.openInputStream(uri))
-                                        if (unzip.unzip()){
-                                            val file = uri.toFile()
-                                            file.delete()
-                                            hideLoading()
-                                        }else {
-                                            showSnackBar(R.string.zun_zip_error)
-                                            hideLoading()
-                                        }
-                                    }
-                                }*/
+                sideEffect.zipFile?.also { uri ->
+                    showLoading()
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        val unzip =
+                            Decompress(requireContext().contentResolver.openInputStream(uri))
+                        if (unzip.unzip()) {
+                            val file = uri.toFile()
+                            file.delete()
+                            hideLoading()
+                            mViewModel.downloadFile(Constant.APK_FILE_LINK_DOWNLOAD, false)
+                        } else {
+                            showSnackBar(R.string.zun_zip_error)
+                            hideLoading()
+                        }
+                    }
+                }
             }
+
             is FileSideEffect.DownloadError -> {
                 hideLoading()
                 showSnackBar(sideEffect.message)
@@ -140,8 +141,8 @@ class DashboardFragment : Fragment() {
             is FileSideEffect.DownloadCompleteApk -> {
                 hideProgressDialog()
                 Timber.tag("apk").e("apk")
-                //mViewModel.checkFolder(requireContext())
-                /*try {
+                mViewModel.checkFolder(requireContext())
+                try {
                     val uri = sideEffect.file.getUriFromFile(requireContext())
                     try {
                         val mime = requireContext().contentResolver.getType(uri)
@@ -168,23 +169,24 @@ class DashboardFragment : Fragment() {
 
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
-                }*/
+                }
             }
+
             FileSideEffect.StartDownload -> showProgressDownloadFile()
-            is FileSideEffect.SuccessfullySetUsername ->showSnackBar(sideEffect.message)
+            is FileSideEffect.SuccessfullySetUsername -> showSnackBar(sideEffect.message)
         }
     }
 
-    private fun showProgressDownloadFile(){
-        requireActivity().runOnUiThread{
+    private fun showProgressDownloadFile() {
+        requireActivity().runOnUiThread {
             mProgress = ProgressDialog()
             mProgress?.isCancelable = false
             mProgress?.show(this@DashboardFragment.childFragmentManager, "progress_dialog")
         }
     }
 
-    private fun hideProgressDialog(){
-        requireActivity().runOnUiThread{
+    private fun hideProgressDialog() {
+        requireActivity().runOnUiThread {
             mProgress?.dismiss()
         }
     }

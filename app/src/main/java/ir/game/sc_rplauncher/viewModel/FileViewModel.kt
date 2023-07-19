@@ -63,7 +63,6 @@ class FileViewModel @Inject constructor(
     }
 
     fun downloadFile(fileUrl: String, isZipFile: Boolean) = intent {
-        Timber.tag("url").e("dddddddd")
         fetch.removeAll()
         val fileName = URLUtil.guessFileName(fileUrl, null, null)
         val file = if (isZipFile)
@@ -75,26 +74,21 @@ class FileViewModel @Inject constructor(
         request.networkType = NetworkType.ALL
         fetch.enqueue(request,
             { updatedRequest: Request? ->
-                Timber.tag("wwww").e(updatedRequest.toString())
             }
         ) { error: Error? ->
-            Timber.tag("start download error").e(error?.throwable)
             viewModelScope.launch {
                 postSideEffect(sideEffect = FileSideEffect.DownloadError(R.string.download_error))
             }
         }
+        val listener = object : FetchListener {
+            override fun onAdded(download: Download) {
 
-        fetch.addListener(
-            object : FetchListener {
-                override fun onAdded(download: Download) {
+            }
 
-                }
+            override fun onCancelled(download: Download) = Unit
 
-                override fun onCancelled(download: Download) {
-                }
-
-                override fun onCompleted(download: Download) {
-                    Timber.tag("download").e(isZipFile.toString())
+            override fun onCompleted(download: Download) {
+                if (request.id == download.id){
                     intent {
                         postSideEffect(
                             sideEffect = if (isZipFile) FileSideEffect.CompleteDownloadFile(download.fileUri) else FileSideEffect.DownloadCompleteApk(
@@ -103,71 +97,68 @@ class FileViewModel @Inject constructor(
                         )
                     }
                 }
+            }
 
-                override fun onDeleted(download: Download) {
-                }
+            override fun onDeleted(download: Download) = Unit
 
-                override fun onDownloadBlockUpdated(
-                    download: Download,
-                    downloadBlock: DownloadBlock,
-                    totalBlocks: Int
-                ) {
-                }
+            override fun onDownloadBlockUpdated(
+                download: Download,
+                downloadBlock: DownloadBlock,
+                totalBlocks: Int
+            ) = Unit
 
-                override fun onError(download: Download, error: Error, throwable: Throwable?) {
-                    Timber.tag("error download").e(throwable)
+            override fun onError(download: Download, error: Error, throwable: Throwable?) {
+                if (request.id == download.id){
                     FileUtil.removeDir(download.file)
+                    fetch.removeAll()
                     viewModelScope.launch {
                         postSideEffect(sideEffect = FileSideEffect.DownloadError(R.string.download_error))
                     }
-
                 }
+            }
 
-                override fun onPaused(download: Download) {
-                }
+            override fun onPaused(download: Download) = Unit
 
-                override fun onProgress(
-                    download: Download,
-                    etaInMilliSeconds: Long,
-                    downloadedBytesPerSecond: Long
-                ) {
-                    Timber.tag("download progress").e(download.progress.toString())
-                    viewModelScope.launch {
-                        postSideEffect(
-                            sideEffect = FileSideEffect.DownloadFile(
-                                progress = download.progress
-                            )
+            override fun onProgress(
+                download: Download,
+                etaInMilliSeconds: Long,
+                downloadedBytesPerSecond: Long
+            ) {
+                viewModelScope.launch {
+                    postSideEffect(
+                        sideEffect = FileSideEffect.DownloadFile(
+                            progress = download.progress
                         )
-                    }
+                    )
                 }
+            }
 
-                override fun onQueued(download: Download, waitingOnNetwork: Boolean) {
-                    Timber.tag("download start").e("start download")
+            override fun onQueued(download: Download, waitingOnNetwork: Boolean) {
+                Timber.tag("download start").e(download.toString())
+                if (request.id == download.id){
                     viewModelScope.launch {
                         postSideEffect(sideEffect = FileSideEffect.StartDownload)
                     }
                 }
+            }
 
-                override fun onRemoved(download: Download) {
-                }
+            override fun onRemoved(download: Download) = Unit
 
-                override fun onResumed(download: Download) {
-                }
+            override fun onResumed(download: Download) = Unit
 
-                override fun onStarted(
-                    download: Download,
-                    downloadBlocks: List<DownloadBlock>,
-                    totalBlocks: Int
-                ) {
-                }
+            override fun onStarted(
+                download: Download,
+                downloadBlocks: List<DownloadBlock>,
+                totalBlocks: Int
+            ) = Unit
 
-                override fun onWaitingNetwork(download: Download) {
-                }
+            override fun onWaitingNetwork(download: Download) = Unit
 
-            },
+        }
+        fetch.addListener(
             notify = true,
-            autoStart = true
+            autoStart = true,
+            listener = listener
         )
-
     }
 }

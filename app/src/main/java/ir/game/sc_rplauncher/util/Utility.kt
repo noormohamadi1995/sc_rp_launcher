@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
-import timber.log.Timber
 import java.io.File
 
 
@@ -15,7 +14,6 @@ object Utility {
         val pkgList = packageManager.queryIntentActivities(intent, 0)
         var isFound = false
         pkgList.forEach {
-            Timber.tag("package").e(it.activityInfo.packageName)
             if (it.activityInfo.packageName != null && it.activityInfo.packageName.equals(packageName))
                 isFound = true
         }
