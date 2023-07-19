@@ -1,25 +1,26 @@
 package ir.game.sc_rplauncher.util
 
 import android.content.Context
-import android.content.pm.PackageManager
+import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import androidx.core.content.FileProvider
+import timber.log.Timber
 import java.io.File
 
 
 object Utility {
     fun Context.checkInstalledPackage(packageName : String) : Boolean{
-        return try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
-            } else {
-                packageManager.getPackageInfo(packageName, 0)
-            }
-            true
-        }catch (e: PackageManager.NameNotFoundException){
-            false
+        val intent = Intent(Intent.ACTION_MAIN, null)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        val pkgList = packageManager.queryIntentActivities(intent, 0)
+        var isFound = false
+        pkgList.forEach {
+            Timber.tag("package").e(it.activityInfo.packageName)
+            if (it.activityInfo.packageName != null && it.activityInfo.packageName.equals(packageName))
+                isFound = true
         }
+
+        return isFound
     }
 
     fun String.getUriFromFile(context: Context): Uri {

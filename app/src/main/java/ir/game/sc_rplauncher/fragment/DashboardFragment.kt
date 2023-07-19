@@ -31,6 +31,7 @@ import ir.game.sc_rplauncher.viewModel.FileViewState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.viewmodel.observe
+import timber.log.Timber
 
 
 @AndroidEntryPoint
@@ -97,31 +98,34 @@ class DashboardFragment : Fragment() {
                 if (username.isNotEmpty()){
                     mViewModel.setUsernameToFile(username)
                 }else showSnackBar(R.string.username_empty)
-            }else
-                mViewModel.downloadFile(Constant.ZIP_FILE_LINK_DOWNLOAD)
+            }else{
+                Timber.tag("ggggg").e("hhhhhhhh")
+                mViewModel.downloadFile(Constant.ZIP_FILE_LINK_DOWNLOAD,true)
+            }
         }
     }
 
     context(FragmentDashboardBinding)
             private fun handleSideEffect(sideEffect: FileSideEffect) {
         when (sideEffect) {
-            is FileSideEffect.CompleteDownload -> {
+            is FileSideEffect.CompleteDownloadFile -> {
                 hideProgressDialog()
-                sideEffect.zipFile?.also {uri->
-                    showLoading()
-                    lifecycleScope.launch(Dispatchers.IO){
-                        val unzip = Decompress(requireContext().contentResolver.openInputStream(uri))
-                        if (unzip.unzip()){
-                            val file = uri.toFile()
-                            file.delete()
-                            hideLoading()
-                        }else {
-                            showSnackBar(R.string.zun_zip_error)
-                            hideLoading()
-                        }
-                        mViewModel.downloadApk(Constant.APK_FILE_LINK_DOWNLOAD)
-                    }
-                }
+                mViewModel.downloadFile(Constant.APK_FILE_LINK_DOWNLOAD,false)
+
+                /*                sideEffect.zipFile?.also {uri->
+                                    showLoading()
+                                    lifecycleScope.launch(Dispatchers.IO){
+                                        val unzip = Decompress(requireContext().contentResolver.openInputStream(uri))
+                                        if (unzip.unzip()){
+                                            val file = uri.toFile()
+                                            file.delete()
+                                            hideLoading()
+                                        }else {
+                                            showSnackBar(R.string.zun_zip_error)
+                                            hideLoading()
+                                        }
+                                    }
+                                }*/
             }
             is FileSideEffect.DownloadError -> {
                 hideLoading()
@@ -135,9 +139,9 @@ class DashboardFragment : Fragment() {
 
             is FileSideEffect.DownloadCompleteApk -> {
                 hideProgressDialog()
-                mViewModel.checkFolder(requireContext())
-                hideLoading()
-                try {
+                Timber.tag("apk").e("apk")
+                //mViewModel.checkFolder(requireContext())
+                /*try {
                     val uri = sideEffect.file.getUriFromFile(requireContext())
                     try {
                         val mime = requireContext().contentResolver.getType(uri)
@@ -164,10 +168,8 @@ class DashboardFragment : Fragment() {
 
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
-                }
+                }*/
             }
-
-            is FileSideEffect.UnZipFile -> Unit
             FileSideEffect.StartDownload -> showProgressDownloadFile()
             is FileSideEffect.SuccessfullySetUsername ->showSnackBar(sideEffect.message)
         }

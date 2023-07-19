@@ -62,10 +62,14 @@ class FileViewModel @Inject constructor(
         postSideEffect(sideEffect = FileSideEffect.SuccessfullySetUsername(R.string.username_replace_success))
     }
 
-    fun downloadFile(fileUrl: String) = intent {
+    fun downloadFile(fileUrl: String, isZipFile: Boolean) = intent {
+        Timber.tag("url").e("dddddddd")
         fetch.removeAll()
         val fileName = URLUtil.guessFileName(fileUrl, null, null)
-        val file = Environment.getExternalStorageDirectory().path + File.separator + fileName
+        val file = if (isZipFile)
+            Environment.getExternalStorageDirectory().path + File.separator + fileName
+        else
+            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path + File.separator + fileName
         val request = Request(fileUrl, file)
         request.priority = Priority.HIGH
         request.networkType = NetworkType.ALL
@@ -90,9 +94,13 @@ class FileViewModel @Inject constructor(
                 }
 
                 override fun onCompleted(download: Download) {
-                    Timber.tag("download").e(download.file)
-                    viewModelScope.launch {
-                        postSideEffect(sideEffect = FileSideEffect.CompleteDownload(download.fileUri))
+                    Timber.tag("download").e(isZipFile.toString())
+                    intent {
+                        postSideEffect(
+                            sideEffect = if (isZipFile) FileSideEffect.CompleteDownloadFile(download.fileUri) else FileSideEffect.DownloadCompleteApk(
+                                download.file
+                            )
+                        )
                     }
                 }
 
@@ -162,100 +170,4 @@ class FileViewModel @Inject constructor(
         )
 
     }
-
-    fun downloadApk(fileUrl: String) = intent {
-        fetch.removeAll()
-        val fileName = URLUtil.guessFileName(fileUrl, null, null)
-
-        val file =
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).path + File.separator + fileName
-
-        val request = Request(fileUrl, file)
-        request.priority = Priority.HIGH
-        request.networkType = NetworkType.ALL
-        fetch.enqueue(request,
-            {
-            }
-        ) { error: Error? ->
-            viewModelScope.launch {
-                postSideEffect(sideEffect = FileSideEffect.DownloadError(R.string.download_error))
-            }
-        }
-
-        fetch.addListener(
-            object : FetchListener {
-                override fun onAdded(download: Download) {
-                }
-
-                override fun onCancelled(download: Download) {
-                }
-
-                override fun onCompleted(download: Download) {
-                    viewModelScope.launch {
-                        postSideEffect(sideEffect = FileSideEffect.DownloadCompleteApk(download.file))
-                    }
-                }
-
-                override fun onDeleted(download: Download) {
-                }
-
-                override fun onDownloadBlockUpdated(
-                    download: Download,
-                    downloadBlock: DownloadBlock,
-                    totalBlocks: Int
-                ) {
-                }
-
-                override fun onError(download: Download, error: Error, throwable: Throwable?) {
-                    viewModelScope.launch {
-                        postSideEffect(sideEffect = FileSideEffect.DownloadError(R.string.download_error))
-                    }
-
-                }
-
-                override fun onPaused(download: Download) {
-                }
-
-                override fun onProgress(
-                    download: Download,
-                    etaInMilliSeconds: Long,
-                    downloadedBytesPerSecond: Long
-                ) {
-                    viewModelScope.launch {
-                        postSideEffect(
-                            sideEffect = FileSideEffect.DownloadFile(
-                                progress = download.progress
-                            )
-                        )
-                    }
-                }
-
-                override fun onQueued(download: Download, waitingOnNetwork: Boolean) {
-                    viewModelScope.launch {
-                        postSideEffect(sideEffect = FileSideEffect.StartDownload)
-                    }
-                }
-
-                override fun onRemoved(download: Download) {
-                }
-
-                override fun onResumed(download: Download) {
-                }
-
-                override fun onStarted(
-                    download: Download,
-                    downloadBlocks: List<DownloadBlock>,
-                    totalBlocks: Int
-                ) {
-                }
-
-                override fun onWaitingNetwork(download: Download) {
-                }
-
-            },
-            notify = true,
-            autoStart = true
-        )
-    }
-
 }

@@ -10,8 +10,7 @@ data class FileViewState(
 sealed interface FileSideEffect {
     class DownloadFile(val progress: Int) : FileSideEffect
     object StartDownload : FileSideEffect
-    class UnZipFile(val unZipState: Boolean) : FileSideEffect
-    class CompleteDownload(val zipFile: Uri? = null) : FileSideEffect
+    class CompleteDownloadFile(val zipFile: Uri? = null) : FileSideEffect
     class DownloadError(@StringRes val message: Int) : FileSideEffect
 
     class DownloadCompleteApk(val file: String) : FileSideEffect
