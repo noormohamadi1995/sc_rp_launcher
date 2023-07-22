@@ -100,7 +100,7 @@ class DashboardFragment : Fragment() {
                     mViewModel.setUsernameToFile(username)
                 } else showSnackBar(R.string.username_empty)
             } else {
-                mViewModel.downloadFile(Constant.ZIP_FILE_LINK_DOWNLOAD, true)
+                mViewModel.downloadFile(requireContext())
             }
         }
     }
@@ -119,7 +119,7 @@ class DashboardFragment : Fragment() {
                             val file = uri.toFile()
                             file.delete()
                             hideLoading()
-                            mViewModel.downloadFile(Constant.APK_FILE_LINK_DOWNLOAD, false)
+                            mViewModel.downloadFile(requireContext())
                         } else {
                             showSnackBar(R.string.zun_zip_error)
                             hideLoading()
@@ -174,12 +174,15 @@ class DashboardFragment : Fragment() {
 
             FileSideEffect.StartDownload -> showProgressDownloadFile()
             is FileSideEffect.SuccessfullySetUsername -> showSnackBar(sideEffect.message)
+            FileSideEffect.CancelDownload -> hideProgressDialog()
         }
     }
 
     private fun showProgressDownloadFile() {
         requireActivity().runOnUiThread {
-            mProgress = ProgressDialog()
+            mProgress = ProgressDialog {
+                mViewModel.cancelDownload()
+            }
             mProgress?.isCancelable = false
             mProgress?.show(this@DashboardFragment.childFragmentManager, "progress_dialog")
         }

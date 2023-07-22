@@ -15,5 +15,7 @@ sealed interface FileSideEffect {
 
     class DownloadCompleteApk(val file: String) : FileSideEffect
 
+    object CancelDownload : FileSideEffect
+
     class SuccessfullySetUsername(@StringRes val message: Int) : FileSideEffect
 }

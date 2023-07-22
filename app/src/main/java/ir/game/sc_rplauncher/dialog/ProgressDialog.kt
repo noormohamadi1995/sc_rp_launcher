@@ -9,7 +9,9 @@ import androidx.fragment.app.DialogFragment
 import ir.game.sc_rplauncher.R
 import ir.game.sc_rplauncher.databinding.ProgressLayoutBinding
 
-class ProgressDialog : DialogFragment() {
+class ProgressDialog(
+    val onClickClose : () -> Unit
+) : DialogFragment() {
     private var mBinding : ProgressLayoutBinding? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,6 +26,15 @@ class ProgressDialog : DialogFragment() {
     ) = ProgressLayoutBinding.inflate(inflater,container,false).apply {
         mBinding =this
     }.root
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        mBinding?.apply {
+            btnClose.setOnClickListener {
+                onClickClose.invoke()
+            }
+        }
+    }
 
     fun setProgress(progress : Int) = mBinding?.apply {
         progressBar.progress = progress
