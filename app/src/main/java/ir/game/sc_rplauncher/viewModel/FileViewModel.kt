@@ -99,7 +99,7 @@ class FileViewModel @Inject constructor(
                     if (request.id == download.id) {
                         intent {
                             postSideEffect(
-                                sideEffect = if (isDataFolder) FileSideEffect.CompleteDownloadFile(download.fileUri) else FileSideEffect.DownloadCompleteApk(
+                                sideEffect = if (isDataFolder.not()) FileSideEffect.CompleteDownloadFile(download.fileUri) else FileSideEffect.DownloadCompleteApk(
                                     download.file
                                 )
                             )
