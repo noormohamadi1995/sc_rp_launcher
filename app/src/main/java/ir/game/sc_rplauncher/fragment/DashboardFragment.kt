@@ -31,7 +31,6 @@ import ir.game.sc_rplauncher.viewModel.FileViewState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.orbitmvi.orbit.viewmodel.observe
-import timber.log.Timber
 
 
 @AndroidEntryPoint
@@ -69,14 +68,6 @@ class DashboardFragment : Fragment() {
             showRuleDialog()
         }
 
-        btnStartGame.setOnClickListener {
-            val launchIntent =
-                requireContext().packageManager.getLaunchIntentForPackage(Constant.GAME_PACKAGE)
-            if (launchIntent != null) {
-                startActivity(launchIntent)
-            }
-        }
-
         edtAddress.doAfterTextChanged {
             val result: String = it.toString().replace(" ", "_")
             if (it.toString() != result) {
@@ -93,15 +84,16 @@ class DashboardFragment : Fragment() {
             else R.string.data_download
         )
         btnStartGame.isEnabled = fileViewState.isExitFolder
+        btnStartGame.setOnClickListener {
+            val username = edtAddress.text.toString()
+            if (username.isNotEmpty()) {
+                mViewModel.setUsernameToFile(username)
+            } else showSnackBar(R.string.username_empty)
+        }
+
         btnDownloadData.setOnClickListener {
-            if (fileViewState.isExitFolder) {
-                val username = edtAddress.text.toString()
-                if (username.isNotEmpty()) {
-                    mViewModel.setUsernameToFile(username)
-                } else showSnackBar(R.string.username_empty)
-            } else {
+            if(fileViewState.isExitFolder.not())
                 mViewModel.downloadFile(requireContext())
-            }
         }
     }
 
@@ -140,7 +132,6 @@ class DashboardFragment : Fragment() {
 
             is FileSideEffect.DownloadCompleteApk -> {
                 hideProgressDialog()
-                Timber.tag("apk").e("apk")
                 mViewModel.checkFolder(requireContext())
                 try {
                     val uri = sideEffect.file.getUriFromFile(requireContext())
@@ -173,7 +164,14 @@ class DashboardFragment : Fragment() {
             }
 
             FileSideEffect.StartDownload -> showProgressDownloadFile()
-            is FileSideEffect.SuccessfullySetUsername -> showSnackBar(sideEffect.message)
+            is FileSideEffect.SuccessfullySetUsername -> {
+                showSnackBar(sideEffect.message)
+                val launchIntent =
+                    requireContext().packageManager.getLaunchIntentForPackage(Constant.GAME_PACKAGE)
+                if (launchIntent != null) {
+                    startActivity(launchIntent)
+                }
+            }
             FileSideEffect.CancelDownload -> hideProgressDialog()
         }
     }
